@@ -61,20 +61,23 @@ POST /api/proxy
 
 # Run adversarial attack harness
 GET /api/attack
+
 ```
 
 ## Running Locally
 
 git clone https://github.com/GyanviDev/piiguard.git
 cd piiguard
+
 # Add your Groq API key to environment variables or local properties
 ./mvnw spring-boot:run
+
 # Open http://localhost:8081
 
 ## Known Limitations & Next Steps
 
-NER misses implicit PII ("my boss in Mumbai") — next: semantic similarity layer
+* NER misses implicit PII ("my boss in Mumbai") — next: semantic similarity layer
 
-Laplace noise on correlated numbers breaks mathematical relationships — next: correlated noise with sensitivity composition
+* Laplace noise on correlated numbers breaks mathematical relationships — next: correlated noise with sensitivity composition
 
-Single instance — next: Redis token vault + WebFlux reactive pipeline for 10k RPS
+* Single instance — next: Redis token vault + WebFlux reactive pipeline for 10k RPS
