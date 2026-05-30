@@ -65,14 +65,13 @@ GET /api/attack
 ```
 
 ## Running Locally
-
+```
 git clone https://github.com/GyanviDev/piiguard.git
 cd piiguard
-
 # Add your Groq API key to environment variables or local properties
 ./mvnw spring-boot:run
-
 # Open http://localhost:8081
+```
 
 ## Known Limitations & Next Steps
 
