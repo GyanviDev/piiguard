@@ -61,6 +61,7 @@ POST /api/proxy
 
 # Run adversarial attack harness
 GET /api/attack
+```
 
 ## Running Locally
 
