@@ -22,9 +22,12 @@ public class ProxyController {
     private DifferentialPrivacyService dpService;
 
     @Autowired
+    private NerService nerService;
+
+    @Autowired
     private AdversarialHarnessService adversarialHarness;
 
-@Value("${groq.api.key:YOUR_KEY_HERE}")
+    @Value("${groq.api.key:API_KEY}")
     private String groqApiKey;
 
     @PostMapping("/proxy")
@@ -34,8 +37,26 @@ public class ProxyController {
         String userPrompt = request.get("prompt");
         String sessionId = UUID.randomUUID().toString();
 
+        // Check for attacks before processing
+        if (adversarialHarness.isAttack(userPrompt)) {
+            Map<String, Object> blocked = new LinkedHashMap<>();
+            blocked.put("originalPrompt", userPrompt);
+            blocked.put("sanitizedPrompt", "BLOCKED");
+            blocked.put("llmResponse", "Request blocked: adversarial attack detected.");
+            blocked.put("sessionId", sessionId);
+            blocked.put("attackDetected", true);
+            return ResponseEntity.status(403).body(blocked);
+        }
+
+        // Layer 1: Regex sanitization (emails, phones, cards, IPs)
         String sanitized = regexSanitizer.sanitize(userPrompt, sessionId, tokenVault);
-        String dpApplied = dpService.applyDifferentialPrivacy(sanitized);
+
+        // Layer 2: NER sanitization (person names)
+        String nerSanitized = nerService.sanitizeNames(sanitized, sessionId, tokenVault);
+
+        // Layer 3: Differential Privacy on numbers
+        String dpApplied = dpService.applyDifferentialPrivacy(nerSanitized);
+
         String llmResponse = callGroq(dpApplied);
         String finalResponse = reInjectTokens(llmResponse, sessionId);
         tokenVault.clearSession(sessionId);
@@ -45,6 +66,8 @@ public class ProxyController {
         response.put("sanitizedPrompt", dpApplied);
         response.put("llmResponse", finalResponse);
         response.put("sessionId", sessionId);
+        response.put("attackDetected", false);
+        response.put("nerActive", nerService.isLoaded());
 
         return ResponseEntity.ok(response);
     }
@@ -53,6 +76,16 @@ public class ProxyController {
     public ResponseEntity<List<Map<String, Object>>> runAttacks() {
         List<Map<String, Object>> results = adversarialHarness.runAllAttacks();
         return ResponseEntity.ok(results);
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<Map<String, Object>> status() {
+        Map<String, Object> status = new LinkedHashMap<>();
+        status.put("server", "running");
+        status.put("nerModelLoaded", nerService.isLoaded());
+        status.put("dpEpsilon", 0.1);
+        status.put("attackPatternsLoaded", 5);
+        return ResponseEntity.ok(status);
     }
 
     private String callGroq(String sanitizedPrompt) {
