@@ -1,0 +1,246 @@
+# Supplementary name lexicon.
+#
+# WHY THIS FILE EXISTS
+# --------------------
+# The OpenNLP person model (en-ner-person.bin) is trained predominantly on English-language
+# newswire, so its notion of "what a name looks like" is drawn from a Western distribution.
+# Measured on this system it redacts "John Smith" and "Michael Johnson" reliably and misses
+# "Priya Sharma" and "Rahul Verma" completely — not occasionally, entirely.
+#
+# For a product deployed in India that is not a rough edge, it is the failure mode that
+# matters most: the tool works for the names it was demoed with and silently forwards the
+# names of the actual users. A statistical model inherits the demographics of its training
+# corpus, and pretending otherwise is how bias becomes a security defect.
+#
+# A curated lexicon is the honest supplement. It does not generalise the way a model does —
+# it only knows what is written here — but for a bounded, well-documented name distribution
+# that is exactly the right trade: perfect recall on the listed entries, zero on the rest,
+# and no guessing in between. The model still handles everything outside this list.
+#
+# FORMAT
+#   One entry per line. Blank lines and lines starting with # are ignored.
+#   Matching is case-sensitive on the first letter (a capitalised token), so ordinary
+#   lower-case prose containing the same string is not redacted.
+#
+# EXTENDING
+#   This is a resource file, not source, so a deployment can extend it for its own locale
+#   without recompiling. Add entries that are unambiguously names; avoid tokens that are
+#   also common nouns, because a false positive corrupts a legitimate prompt.
+
+# ── Given names ──────────────────────────────────────────────────────────────
+Aarav
+Aditi
+Aditya
+Akash
+Akshay
+Amit
+Ananya
+Anil
+Anita
+Anjali
+Ankit
+Anushka
+Arjun
+Arun
+Ashish
+Ashok
+Bhavna
+Chetan
+Deepak
+Deepika
+Devika
+Dhruv
+Divya
+Gaurav
+Gayatri
+Geeta
+Gyanvi
+Harsh
+Hemant
+Ishaan
+Jyoti
+Kavita
+Kiran
+Krishna
+Lakshmi
+Madhav
+Mahesh
+Manish
+Meera
+Mohit
+Mukesh
+Naveen
+Neha
+Nikhil
+Nisha
+Pallavi
+Pankaj
+Parul
+Pooja
+Prakash
+Pranav
+Prateek
+Praveen
+Preeti
+Priya
+Priyanka
+Rahul
+Rajesh
+Rakesh
+Ramesh
+Rashmi
+Ravi
+Reena
+Rekha
+Riya
+Rohan
+Rohit
+Ruchi
+Sachin
+Sagar
+Sahil
+Sakshi
+Sameer
+Sandeep
+Sanjay
+Sanya
+Saurabh
+Shalini
+Shashank
+Shikha
+Shivani
+Shreya
+Shruti
+Siddharth
+Simran
+Sneha
+Snehal
+Sonal
+Sonia
+Sudhir
+Suman
+Sunil
+Sunita
+Suresh
+Swati
+Tanvi
+Tarun
+Tushar
+Uday
+Vaishali
+Varun
+Vedant
+Vikas
+Vikram
+Vinay
+Vinod
+Vishal
+Vivek
+Yash
+Yogesh
+Zara
+
+# ── Surnames ─────────────────────────────────────────────────────────────────
+Agarwal
+Aggarwal
+Ahuja
+Anand
+Arora
+Bajaj
+Balakrishnan
+Banerjee
+Bansal
+Basu
+Bhat
+Bhatia
+Bhattacharya
+Chakraborty
+Chandra
+Chatterjee
+Chauhan
+Chopra
+Dasgupta
+Desai
+Deshmukh
+Dhawan
+Dixit
+Dubey
+Dutta
+Gandhi
+Ganguly
+Ghosh
+Goel
+Gokhale
+Goswami
+Gowda
+Gupta
+Hegde
+Iyengar
+Iyer
+Jaiswal
+Joshi
+Kapoor
+Kaul
+Kaur
+Khanna
+Khatri
+Kohli
+Kulkarni
+Mahajan
+Maheshwari
+Malhotra
+Mallick
+Mandal
+Mehra
+Mehta
+Menon
+Mishra
+Mukherjee
+Murthy
+Nagarajan
+Naidu
+Nair
+Nambiar
+Narayan
+Narayanan
+Nayak
+Oberoi
+Padmanabhan
+Pandey
+Pandit
+Parekh
+Patel
+Pathak
+Patil
+Pillai
+Prasad
+Radhakrishnan
+Raghavan
+Rajan
+Ramachandran
+Ramakrishnan
+Raman
+Rastogi
+Reddy
+Sachdeva
+Sahni
+Saini
+Sarkar
+Saxena
+Sengupta
+Sharma
+Shetty
+Shukla
+Singhal
+Sinha
+Srinivasan
+Subramanian
+Sundaram
+Tandon
+Thakur
+Tiwari
+Trivedi
+Tyagi
+Varma
+Verma
+Yadav

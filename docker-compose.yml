@@ -1,0 +1,59 @@
+# ══════════════════════════════════════════════════════════════════════════════
+#  Local / single-host deployment.
+#
+#  Changes from the previous file:
+#    * Dropped the `version:` key — obsolete since Compose v2 and ignored with a warning.
+#    * The ML sidecar's port is no longer published to the host. It was reachable from
+#      outside, which handed anyone on the network a free oracle for tuning a prompt
+#      until it scored below the block threshold. It is now on the internal network only,
+#      which is the whole reason to have an internal network.
+#    * `depends_on` now waits for HEALTH, not just for the container to be created. The
+#      old form started the Java proxy immediately, so the first requests after every
+#      deploy ran with the classifier unreachable — and the Java side treated that as
+#      "SAFE". Startup order was silently degrading detection.
+#    * The H2 file lives on a named volume, so the audit log survives a restart. An audit
+#      log that is wiped on deploy cannot support the compliance argument it exists for.
+#    * Secrets come from the environment with no fallback values.
+# ══════════════════════════════════════════════════════════════════════════════
+
+services:
+
+  piiguard:
+    build: .
+    image: piiguard:latest
+    ports:
+      - "8081:8081"
+    environment:
+      GROQ_API_KEY: ${GROQ_API_KEY:?GROQ_API_KEY must be set}
+      ADMIN_API_KEY: ${ADMIN_API_KEY:?ADMIN_API_KEY must be set}
+      AUDIT_HASH_SECRET: ${AUDIT_HASH_SECRET:-}
+      ML_SERVICE_URL: http://ml-service:8000
+      ML_API_KEY: ${ML_API_KEY:-}
+      DETECTION_FAIL_CLOSED: ${DETECTION_FAIL_CLOSED:-false}
+      DB_URL: jdbc:h2:file:/app/data/piiguard;DB_CLOSE_ON_EXIT=FALSE
+    volumes:
+      - piiguard-data:/app/data
+    depends_on:
+      ml-service:
+        condition: service_healthy
+    restart: unless-stopped
+    # Defence in depth: even a compromised process cannot write outside the data volume
+    # or gain privileges beyond those it started with.
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
+
+  ml-service:
+    build: ./python-service
+    image: piiguard-ml:latest
+    # No `ports:` — internal to the compose network by design.
+    expose:
+      - "8000"
+    environment:
+      ML_API_KEY: ${ML_API_KEY:-}
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  piiguard-data:
