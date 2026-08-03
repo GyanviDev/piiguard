@@ -51,7 +51,13 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError"
 
 # Readiness comes from Spring Boot's own probe, so the container is only considered
 # healthy once the NER model has loaded and the datasource is up.
+#
+# The port MUST be read from the environment rather than hard-coded. Platforms that
+# assign a port (Render, Cloud Run, Heroku) inject PORT, and the application binds to
+# it via server.port=${PORT:8081}. A healthcheck pinned to 8081 would then probe a port
+# nothing is listening on and report the container permanently unhealthy while it was
+# in fact serving traffic correctly.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD wget -q --spider http://localhost:8081/actuator/health/readiness || exit 1
+  CMD wget -q --spider "http://localhost:${PORT:-8081}/actuator/health/readiness" || exit 1
 
 ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/app.jar"]
