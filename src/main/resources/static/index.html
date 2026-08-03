@@ -4,395 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PII Guard — Enterprise Privacy Proxy</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg:        #080C10;
-    --surface:   #0D1117;
-    --surface2:  #161B22;
-    --border:    #21262D;
-    --border2:   #30363D;
-    --text:      #E6EDF3;
-    --text2:     #8B949E;
-    --text3:     #484F58;
-    --green:     #3FB950;
-    --green-dim: #238636;
-    --green-bg:  #0F2A1A;
-    --red:       #F85149;
-    --red-dim:   #DA3633;
-    --red-bg:    #2A0F0F;
-    --blue:      #58A6FF;
-    --blue-bg:   #0D1F3C;
-    --amber:     #D29922;
-    --amber-bg:  #2A1F0A;
-    --mono:      'IBM Plex Mono', monospace;
-    --sans:      'IBM Plex Sans', sans-serif;
-  }
+<!--
+  The Google Fonts <link> was removed deliberately. A privacy proxy that makes every
+  visitor's browser announce itself to a third-party CDN — sending IP address, user agent
+  and referring page — is undermined by its own landing page. A system font stack costs
+  nothing, renders instantly, and lets the Content-Security-Policy forbid external origins
+  outright instead of carving out an exception.
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: var(--sans);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-
-  /* TOP BAR */
-  .topbar {
-    height: 48px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    padding: 0 28px;
-    gap: 24px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .topbar-logo {
-    font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    letter-spacing: .02em;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .topbar-logo .shield {
-    width: 18px;
-    height: 18px;
-    background: var(--green);
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    flex-shrink: 0;
-  }
-
-  .topbar-divider {
-    width: 1px;
-    height: 20px;
-    background: var(--border2);
-  }
-
-  .status-pill {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    font-family: var(--mono);
-    color: var(--text2);
-  }
-
-  .status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    animation: pulse-dot 2.5s ease infinite;
-  }
-
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 #3fb95044; }
-    50% { opacity: .7; box-shadow: 0 0 0 4px #3fb95000; }
-  }
-
-  .topbar-tags {
-    margin-left: auto;
-    display: flex;
-    gap: 6px;
-  }
-
-  .tag {
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 500;
-    padding: 2px 8px;
-    border-radius: 3px;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-  }
-
-  .tag-green { background: var(--green-bg); color: var(--green); border: 1px solid #3fb95033; }
-  .tag-blue  { background: var(--blue-bg);  color: var(--blue);  border: 1px solid #58a6ff33; }
-  .tag-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid #d2992233; }
-
-  /* LAYOUT */
-  .layout {
-    display: grid;
-    grid-template-columns: 1fr 380px;
-    grid-template-rows: auto auto;
-    gap: 1px;
-    min-height: calc(100vh - 48px);
-    background: var(--border);
-  }
-
-  .pane {
-    background: var(--bg);
-    padding: 24px 28px;
-  }
-
-  .pane-title {
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    color: var(--text3);
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .pane-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* INPUT PANE */
-  .input-pane {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  textarea {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: 6px;
-    color: var(--text);
-    font-size: 13px;
-    font-family: var(--sans);
-    padding: 14px 16px;
-    resize: vertical;
-    min-height: 140px;
-    outline: none;
-    transition: border-color .15s;
-    line-height: 1.6;
-  }
-
-  textarea::placeholder { color: var(--text3); }
-  textarea:focus { border-color: var(--blue); }
-
-  .input-hint {
-    font-size: 11px;
-    color: var(--text3);
-    font-family: var(--mono);
-    margin-top: 8px;
-    margin-bottom: 16px;
-  }
-
-  .btn-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-
-  .btn {
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 500;
-    padding: 8px 20px;
-    border-radius: 5px;
-    border: 1px solid transparent;
-    cursor: pointer;
-    transition: all .15s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    letter-spacing: .02em;
-  }
-
-  .btn-send {
-    background: var(--green-dim);
-    color: #fff;
-    border-color: var(--green-dim);
-  }
-  .btn-send:hover:not(:disabled) { background: var(--green); border-color: var(--green); }
-  .btn-send:disabled { opacity: .4; cursor: not-allowed; }
-
-  .btn-attack {
-    background: transparent;
-    color: var(--red);
-    border-color: var(--red-dim);
-  }
-  .btn-attack:hover:not(:disabled) { background: var(--red-bg); }
-  .btn-attack:disabled { opacity: .4; cursor: not-allowed; }
-
-  .spinner {
-    display: none;
-    width: 12px;
-    height: 12px;
-    border: 1.5px solid #ffffff44;
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin .5s linear infinite;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* DIFF PANE */
-  .diff-pane {
-    grid-column: 1;
-    grid-row: 2;
-  }
-
-  .diff-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  .diff-block { }
-
-  .diff-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    padding: 4px 10px;
-    border-radius: 3px 3px 0 0;
-    border: 1px solid var(--border2);
-    border-bottom: none;
-    display: inline-block;
-  }
-
-  .diff-label-before { background: var(--red-bg); color: var(--red); }
-  .diff-label-after  { background: var(--green-bg); color: var(--green); }
-
-  .diff-output {
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: 0 6px 6px 6px;
-    padding: 12px 14px;
-    min-height: 80px;
-    font-size: 13px;
-    font-family: var(--mono);
-    line-height: 1.7;
-    color: var(--text2);
-    white-space: pre-wrap;
-    word-break: break-all;
-  }
-
-  .token-highlight {
-    background: var(--blue-bg);
-    color: var(--blue);
-    border: 1px solid #58a6ff44;
-    border-radius: 3px;
-    padding: 1px 5px;
-    font-size: 11px;
-  }
-
-  /* RESPONSE PANE */
-  .response-pane {
-    grid-column: 2;
-    grid-row: 1 / 3;
-    border-left: 1px solid var(--border);
-  }
-
-  .response-output {
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: 6px;
-    padding: 14px 16px;
-    min-height: 200px;
-    font-size: 13px;
-    line-height: 1.7;
-    color: var(--text2);
-    white-space: pre-wrap;
-    margin-bottom: 20px;
-  }
-
-  /* ATTACK LOG */
-  .attack-section {
-    margin-top: 4px;
-  }
-
-  .attack-entry {
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: 6px;
-    padding: 10px 14px;
-    margin-bottom: 8px;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 10px;
-    align-items: center;
-    opacity: 0;
-    transform: translateY(6px);
-    transition: opacity .25s ease, transform .25s ease;
-  }
-
-  .attack-entry.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .attack-type {
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--amber);
-    background: var(--amber-bg);
-    border: 1px solid #d2992233;
-    padding: 2px 7px;
-    border-radius: 3px;
-    white-space: nowrap;
-    letter-spacing: .04em;
-  }
-
-  .attack-payload {
-    font-size: 11px;
-    color: var(--text3);
-    font-family: var(--mono);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .blocked-pill {
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--green);
-    background: var(--green-bg);
-    border: 1px solid #3fb95044;
-    padding: 2px 8px;
-    border-radius: 3px;
-    white-space: nowrap;
-    letter-spacing: .04em;
-  }
-
-  .empty-state {
-    font-size: 12px;
-    font-family: var(--mono);
-    color: var(--text3);
-    padding: 16px 0;
-  }
-
-  /* SESSION META */
-  .meta-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text3);
-    padding: 8px 0;
-    border-top: 1px solid var(--border);
-    margin-top: 8px;
-  }
-
-  .meta-val { color: var(--text2); }
-</style>
+  All JavaScript moved to /js/app.js for the same reason: with no inline script, the CSP
+  can set script-src 'self' with no 'unsafe-inline', which is what actually stops an
+  injected <script> from executing.
+-->
+<link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
 
@@ -403,157 +26,79 @@
   </div>
   <div class="topbar-divider"></div>
   <div class="status-pill">
-    <div class="status-dot"></div>
-    Server active — port 8081
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">checking…</span>
   </div>
-  <div class="topbar-tags">
-    <span class="tag tag-green">Groq Llama 3.3-70B</span>
-    <span class="tag tag-blue">epsilon = 0.1 DP</span>
-    <span class="tag tag-amber">NER + Regex PII</span>
-  </div>
+  <div class="topbar-tags" id="topbarTags"></div>
 </div>
 
 <div class="layout">
 
-  <!-- LEFT TOP: Input -->
+  <!-- LEFT TOP: input -->
   <div class="pane input-pane">
-    <div class="pane-title">Prompt Input</div>
-    <textarea id="promptInput" placeholder="Enter a prompt containing sensitive data. The proxy will sanitize it before forwarding to the LLM.
+    <div class="pane-title">Prompt input</div>
+    <textarea id="promptInput" placeholder="Enter a prompt containing sensitive data. The proxy redacts it before forwarding to the model.
 
-Example: My name is Gyanvi, email is gyanvi@gmail.com, phone 9876543210. Our Q3 revenue was 4500000. Summarize this."></textarea>
-    <div class="input-hint">Ctrl + Enter to send</div>
+Example: My name is Priya Sharma, email priya@acme.com, phone 9876543210. Our Q3 revenue was 4500000. Summarize this."></textarea>
+    <div class="input-hint">
+      <span>Ctrl + Enter to send</span>
+      <label class="toggle">
+        <input type="checkbox" id="noiseToggle" checked>
+        <span>Perturb numeric values</span>
+      </label>
+    </div>
     <div class="btn-row">
-      <button class="btn btn-send" onclick="sendPrompt()" id="sendBtn">
-        <div class="spinner" id="spinner"></div>
-        <span id="sendText">Send to Proxy</span>
+      <button class="btn btn-send" id="sendBtn" type="button">
+        <span class="spinner" id="spinner"></span>
+        <span id="sendText">Send to proxy</span>
       </button>
-      <button class="btn btn-attack" onclick="runAttacks()" id="attackBtn">
-        Run Attack Harness
-      </button>
+      <button class="btn btn-attack" id="attackBtn" type="button">Run detection suite</button>
+      <input class="admin-key" id="adminKey" type="password" placeholder="admin key (for suite)"
+             autocomplete="off" spellcheck="false">
     </div>
   </div>
 
-  <!-- RIGHT: Response + Attack Log -->
+  <!-- RIGHT: response + suite -->
   <div class="pane response-pane">
-    <div class="pane-title">LLM Response</div>
-    <div class="response-output" id="llmResponse">Awaiting request...</div>
+    <div class="pane-title">Model response</div>
+    <div class="response-output" id="llmResponse">Awaiting request…</div>
 
-    <div class="pane-title">Adversarial Harness</div>
+    <div id="warnings"></div>
+
+    <div class="pane-title">Detection suite</div>
     <div class="attack-section">
-      <div class="empty-state" id="attackEmpty">Run the harness to simulate 5 attack vectors against this system.</div>
+      <div class="empty-state" id="attackEmpty">
+        Runs every attack payload plus a set of benign control prompts that must
+        <em>not</em> be blocked. Requires the admin key.
+      </div>
+      <div id="suiteSummary"></div>
       <div id="attackLog"></div>
     </div>
 
-    <div class="meta-row" id="metaRow" style="display:none">
+    <div class="meta-row" id="metaRow" hidden>
       <span>session</span>
       <span class="meta-val" id="sessionId">—</span>
     </div>
   </div>
 
-  <!-- LEFT BOTTOM: Diff -->
+  <!-- LEFT BOTTOM: diff -->
   <div class="pane diff-pane">
-    <div class="pane-title">Sanitization Diff</div>
+    <div class="pane-title">Redaction diff</div>
     <div class="diff-grid">
       <div class="diff-block">
-        <div class="diff-label diff-label-before">Before — Real PII</div>
+        <div class="diff-label diff-label-before">Before — your text</div>
         <div class="diff-output" id="originalPrompt">—</div>
       </div>
       <div class="diff-block">
-        <div class="diff-label diff-label-after">After — Sent to LLM</div>
+        <div class="diff-label diff-label-after">After — transmitted to the model</div>
         <div class="diff-output" id="sanitizedPrompt">—</div>
       </div>
     </div>
+    <div class="redaction-summary" id="redactionSummary"></div>
   </div>
 
 </div>
 
-<script>
-async function sendPrompt() {
-  const prompt = document.getElementById('promptInput').value.trim();
-  if (!prompt) return;
-
-  const btn = document.getElementById('sendBtn');
-  const spinner = document.getElementById('spinner');
-  const sendText = document.getElementById('sendText');
-
-  btn.disabled = true;
-  spinner.style.display = 'inline-block';
-  sendText.textContent = 'Processing...';
-
-  document.getElementById('llmResponse').style.color = 'var(--text3)';
-  document.getElementById('llmResponse').textContent = 'Sanitizing PII  →  Applying DP noise  →  Forwarding to LLM...';
-
-  try {
-    const res = await fetch('/api/proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
-    });
-    const data = await res.json();
-
-    document.getElementById('llmResponse').style.color = 'var(--text)';
-    document.getElementById('llmResponse').textContent = data.llmResponse;
-    document.getElementById('originalPrompt').textContent = data.originalPrompt;
-
-    const sanitized = data.sanitizedPrompt.replace(
-      /\[[A-Z]+_[A-Z0-9]+\]/g,
-      m => `<span class="token-highlight">${m}</span>`
-    );
-    document.getElementById('sanitizedPrompt').innerHTML = sanitized;
-
-    const meta = document.getElementById('metaRow');
-    meta.style.display = 'flex';
-    document.getElementById('sessionId').textContent = data.sessionId.substring(0, 16) + '...';
-
-  } catch(e) {
-    document.getElementById('llmResponse').style.color = 'var(--red)';
-    document.getElementById('llmResponse').textContent = 'Error: ' + e.message;
-  }
-
-  btn.disabled = false;
-  spinner.style.display = 'none';
-  sendText.textContent = 'Send to Proxy';
-}
-
-async function runAttacks() {
-  const btn = document.getElementById('attackBtn');
-  btn.disabled = true;
-  btn.textContent = 'Running...';
-
-  document.getElementById('attackEmpty').style.display = 'none';
-  document.getElementById('attackLog').innerHTML = '';
-
-  try {
-    const res = await fetch('/api/attack');
-    const attacks = await res.json();
-
-    for (let i = 0; i < attacks.length; i++) {
-      await new Promise(r => setTimeout(r, 350));
-      const a = attacks[i];
-      const entry = document.createElement('div');
-      entry.className = 'attack-entry';
-      entry.innerHTML = `
-        <span class="attack-type">${a.attackType}</span>
-        <span class="attack-payload" title="${a.payload}">${a.payload}</span>
-        <span class="blocked-pill">BLOCKED</span>
-      `;
-      document.getElementById('attackLog').appendChild(entry);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => entry.classList.add('visible'));
-      });
-    }
-  } catch(e) {
-    document.getElementById('attackEmpty').style.display = 'block';
-    document.getElementById('attackEmpty').textContent = 'Error: ' + e.message;
-  }
-
-  btn.disabled = false;
-  btn.textContent = 'Run Attack Harness';
-}
-
-document.getElementById('promptInput').addEventListener('keydown', e => {
-  if (e.ctrlKey && e.key === 'Enter') sendPrompt();
-});
-</script>
+<script src="/js/app.js"></script>
 </body>
 </html>

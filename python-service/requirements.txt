@@ -1,0 +1,9 @@
+# Exact pins, not ranges. A security control whose behaviour changes because a
+# transitive dependency published a patch overnight is not a control you can reason
+# about, and "it worked in CI" has to mean the same bytes that reach production.
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+scikit-learn==1.5.2
+joblib==1.4.2
+numpy==1.26.4
+pydantic==2.9.2
