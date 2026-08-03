@@ -2,6 +2,7 @@ package com.piiguard.piiguard.web;
 
 import com.piiguard.piiguard.audit.AuditLog;
 import com.piiguard.piiguard.audit.AuditService;
+import com.piiguard.piiguard.config.PiiGuardProperties;
 import com.piiguard.piiguard.detect.AdversarialHarnessService;
 import com.piiguard.piiguard.detect.MlDetectionService;
 import com.piiguard.piiguard.detect.ThreatVerdict;
@@ -68,6 +69,7 @@ public class ProxyController {
     private final TokenVault vault;
     private final AuditService auditService;
     private final PiiGuardMetrics metrics;
+    private final PiiGuardProperties properties;
 
     public ProxyController(SanitizationPipeline sanitizer,
                            DifferentialPrivacyService dpService,
@@ -79,7 +81,8 @@ public class ProxyController {
                            OutputGuard outputGuard,
                            TokenVault vault,
                            AuditService auditService,
-                           PiiGuardMetrics metrics) {
+                           PiiGuardMetrics metrics,
+                           PiiGuardProperties properties) {
         this.sanitizer = sanitizer;
         this.dpService = dpService;
         this.budgetAccountant = budgetAccountant;
@@ -91,6 +94,7 @@ public class ProxyController {
         this.vault = vault;
         this.auditService = auditService;
         this.metrics = metrics;
+        this.properties = properties;
     }
 
     @PostMapping("/proxy")
@@ -253,6 +257,13 @@ public class ProxyController {
         body.put("nerModelLoaded", nerService.isLoaded());
         body.put("mlServiceAvailable", mlDetection.isServiceAvailable());
         body.put("llmConfigured", llmClient.isConfigured());
+        // Whether an admin key was configured at boot — never the key itself, and never
+        // whether a particular key was correct. Without this, "my key is rejected" and
+        // "the environment variable never reached the container" are indistinguishable
+        // from outside, and the only way to tell them apart is to keep guessing. It
+        // discloses nothing exploitable: a caller who learns admin auth is unconfigured
+        // learns only that the endpoints they already cannot reach are switched off.
+        body.put("adminAuthConfigured", !properties.getAdminApiKey().isBlank());
         return ResponseEntity.ok(body);
     }
 

@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -124,6 +125,20 @@ class SecurityConfigTest {
         org.junit.jupiter.api.Assertions.assertTrue(csp.contains("script-src 'self'"));
         org.junit.jupiter.api.Assertions.assertFalse(csp.contains("script-src 'self' 'unsafe-inline'"));
         org.junit.jupiter.api.Assertions.assertTrue(csp.contains("frame-ancestors 'none'"));
+    }
+
+    @Test
+    @DisplayName("health reports whether an admin key was configured, but never the key")
+    void healthReportsAdminAuthState() throws Exception {
+        // Without this, "my key is rejected" and "the environment variable never reached the
+        // container" look identical from outside, and diagnosing a deployment means guessing.
+        String body = mockMvc.perform(get("/api/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.adminAuthConfigured").value(true))
+                .andReturn().getResponse().getContentAsString();
+
+        org.junit.jupiter.api.Assertions.assertFalse(body.contains(ADMIN_KEY),
+                "The health endpoint must never disclose the key itself");
     }
 
     @Test
